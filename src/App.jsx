@@ -737,51 +737,105 @@ const questions = [
   {
     id: "zip",
     type: "text",
-    label: "Step 1 of 5",
+    label: "Step 1 of 6",
     question: "What is your zip code?",
     placeholder: "e.g. 90210",
+    demographic: true,
+    note: "Demographic context only — not calculated in your score. Source: U.S. Census Bureau.",
+  },
+  {
+    id: "age",
+    type: "options",
+    label: "Step 2 of 6",
+    question: "What is your age?",
+    options: ["Under 18", "18–34", "35–54", "55–64", "65 or older"],
+    demographic: true,
+    note: "Demographic context only — not calculated in your score. Source: U.S. Census Bureau.",
   },
   {
     id: "income",
     type: "options",
-    label: "Step 2 of 5",
+    label: "Step 3 of 6",
     question: "Which best describes your household income?",
-    options: ["Under $25k", "$25k–$50k", "$50k–$100k", "Over $100k"],
-  },
-  {
-    id: "housing",
-    type: "options",
-    label: "Step 3 of 5",
-    question: "How would you describe your housing situation?",
-    options: ["Own my home", "Renting — stable", "Renting — unstable", "Experiencing housing insecurity"],
+    options: ["Under $35,000", "$35,000–$74,999", "$75,000–$124,999", "$125,000 or more"],
+    note: "30% weight · Economic Standing pillar. U.S. median household income: $83,730 (Census Bureau CPS ASEC 2024).",
   },
   {
     id: "healthcare",
     type: "options",
-    label: "Step 4 of 5",
+    label: "Step 4 of 6",
     question: "Do you currently have health insurance?",
-    options: ["Yes, employer-provided", "Yes, government program", "Yes, self-purchased", "No, uninsured"],
+    options: ["Yes, employer-provided", "Yes, government program (Medicaid/Medicare)", "Yes, self-purchased", "No, I am uninsured"],
+    note: "25% weight · Well-Being pillar. 92% of Americans had coverage in 2024 (Census Bureau CPS ASEC 2024).",
   },
   {
-    id: "civic",
+    id: "volunteer",
     type: "options",
-    label: "Step 5 of 5",
-    question: "How engaged are you in your local community?",
-    options: ["Very — I vote, volunteer, donate", "Somewhat — I vote regularly", "A little — occasionally", "Not at all"],
+    label: "Step 5 of 6",
+    question: "Do you currently volunteer with any organizations?",
+    options: ["Yes, regularly (monthly or more)", "Yes, occasionally (a few times a year)", "Not currently, but I have in the past", "No, I have never volunteered"],
+    note: "25% weight · Community pillar. 28.3% of Americans formally volunteered in 2023 (AmeriCorps/Census Bureau Civic Life Survey 2023).",
+  },
+  {
+    id: "voting",
+    type: "options",
+    label: "Step 6 of 6",
+    question: "Are you registered to vote?",
+    options: ["Yes, and I vote in most elections", "Yes, but I rarely vote", "No, but I plan to register", "No, and I don't plan to register"],
+    note: "20% weight · Social Trust pillar. 73.6% of citizen voting-age Americans were registered in 2024 (Census Bureau CPS Voting Supplement 2024).",
   },
 ];
 
 function computeScore(answers) {
-  const incomeMap = { "Under $25k": 30, "$25k–$50k": 50, "$50k–$100k": 70, "Over $100k": 90 };
-  const housingMap = { "Own my home": 90, "Renting — stable": 65, "Renting — unstable": 40, "Experiencing housing insecurity": 15 };
-  const healthMap = { "Yes, employer-provided": 85, "Yes, government program": 70, "Yes, self-purchased": 65, "No, uninsured": 25 };
-  const civicMap = { "Very — I vote, volunteer, donate": 90, "Somewhat — I vote regularly": 65, "A little — occasionally": 40, "Not at all": 20 };
+  // --- Economic Standing (30% weight) ---
+  // Benchmarked to Census Bureau CPS ASEC 2024 — median household income $83,730
+  // Brackets reflect where each range sits relative to the national median
+  const incomeMap = {
+    "Under $35,000": 22,          // below poverty-adjacent threshold; bottom ~20%
+    "$35,000–$74,999": 50,        // below national median of $83,730
+    "$75,000–$124,999": 74,       // near/above national median
+    "$125,000 or more": 93,       // top ~20%; well above national median
+  };
+  const economic = incomeMap[answers.income] || 50;
 
-  const economic = Math.round(((incomeMap[answers.income] || 50) + (housingMap[answers.housing] || 50)) / 2);
+  // --- Well-Being (25% weight) ---
+  // Benchmarked to Census Bureau CPS ASEC 2024 — 92% insured, ~8% uninsured
+  const healthMap = {
+    "Yes, employer-provided": 88,
+    "Yes, government program (Medicaid/Medicare)": 74,
+    "Yes, self-purchased": 68,
+    "No, I am uninsured": 18,     // ~8% of Americans; significant barrier
+  };
   const wellbeing = healthMap[answers.healthcare] || 50;
-  const social = Math.round((civicMap[answers.civic] || 50) * 0.9);
-  const community = Math.round((civicMap[answers.civic] || 50) * 0.85);
-  const total = Math.round((economic + wellbeing + social + community) / 4);
+
+  // --- Community (25% weight) ---
+  // Benchmarked to AmeriCorps/Census Bureau Civic Life Survey 2023 — 28.3% formal volunteer rate
+  const volunteerMap = {
+    "Yes, regularly (monthly or more)": 90,         // well above 28.3% national rate
+    "Yes, occasionally (a few times a year)": 62,   // at or near national benchmark
+    "Not currently, but I have in the past": 38,    // disengaged but experienced
+    "No, I have never volunteered": 18,             // below national participation rate
+  };
+  const community = volunteerMap[answers.volunteer] || 50;
+
+  // --- Social Trust (20% weight) ---
+  // Benchmarked to Census Bureau CPS Voting Supplement 2024 — 73.6% registered nationally
+  const votingMap = {
+    "Yes, and I vote in most elections": 90,   // registered + consistently participates
+    "Yes, but I rarely vote": 55,              // registered but disengaged
+    "No, but I plan to register": 32,          // unregistered; aspirational
+    "No, and I don't plan to register": 15,   // fully disengaged from civic process
+  };
+  const social = votingMap[answers.voting] || 50;
+
+  // --- Total: weighted average ---
+  // Weights: Economic Standing 30%, Well-Being 25%, Community 25%, Social Trust 20%
+  const total = Math.round(
+    economic * 0.30 +
+    wellbeing * 0.25 +
+    community * 0.25 +
+    social * 0.20
+  );
 
   return { total, economic, wellbeing, social, community };
 }
@@ -796,14 +850,31 @@ function getScoreLabel(score) {
 function getAiInsight(scores, answers) {
   const label = getScoreLabel(scores.total);
   const zip = answers.zip || "your area";
-  const lowestPillar = Object.entries({
-    "Economic Standing": scores.economic,
-    "Well-Being": scores.wellbeing,
-    "Social Trust": scores.social,
-    "Community": scores.community,
-  }).sort((a, b) => a[1] - b[1])[0];
+  const age = answers.age ? `at age ${answers.age}` : "";
 
-  return `Your Tobin Index of ${scores.total} reflects a profile we'd describe as "${label}" — a composite reading of your economic position, health access, and civic engagement relative to the promises embedded in the Declaration of Independence. Zip code ${zip} provides important geographic context, as local infrastructure, employment density, and public services significantly shape what's achievable. Your lowest pillar is ${lowestPillar[0]} (${lowestPillar[1]}/100). Focusing here first — whether through local resource programs, community organizations, or civic participation — is likely to yield the most meaningful gains in your overall index. The gap between your current score and 100 is not a measure of failure; it is a measure of what the system still owes you.`;
+  const pillarDetails = {
+    "Economic Standing": {
+      score: scores.economic,
+      context: "The U.S. median household income was $83,730 in 2024 (Census Bureau CPS ASEC 2024). Your income bracket shapes access to housing, credit, and long-term wealth building.",
+    },
+    "Well-Being": {
+      score: scores.wellbeing,
+      context: "92% of Americans had health insurance in 2024 (Census Bureau CPS ASEC 2024). The uninsured face significantly higher barriers to preventive and emergency care.",
+    },
+    "Community": {
+      score: scores.community,
+      context: "28.3% of Americans formally volunteered through an organization in 2023 — the largest recorded expansion of volunteerism in U.S. history (AmeriCorps/Census Bureau Civic Life Survey 2023).",
+    },
+    "Social Trust": {
+      score: scores.social,
+      context: "73.6% of citizen voting-age Americans were registered to vote in 2024 — the most recent data from the Census Bureau CPS Voting Supplement.",
+    },
+  };
+
+  const lowestPillar = Object.entries(pillarDetails).sort((a, b) => a[1].score - b[1].score)[0];
+  const highestPillar = Object.entries(pillarDetails).sort((a, b) => b[1].score - a[1].score)[0];
+
+  return `Your Tobin Index of ${scores.total} ${age} reflects a profile we'd describe as "${label}" — a composite reading of your economic position, health access, civic participation, and community engagement relative to the promises embedded in the Declaration of Independence. Zip code ${zip} provides important geographic context, as local infrastructure, employment density, and public services significantly shape what's achievable.\n\nYour strongest pillar is ${highestPillar[0]} (${highestPillar[1].score}/100). Your lowest pillar is ${lowestPillar[0]} (${lowestPillar[1].score}/100). ${lowestPillar[1].context} Focusing here first — whether through local resource programs, community organizations, or civic participation — is likely to yield the most meaningful gains in your overall index.\n\nThe gap between your current score and 100 is not a measure of failure. It is a measure of what the system still owes you.`;
 }
 
 export default function TobinIndex() {
@@ -813,7 +884,7 @@ export default function TobinIndex() {
   const [scores, setScores] = useState(null);
   const [animating, setAnimating] = useState(false);
 
-  const progress = ((step) / questions.length) * 100;
+  const progress = (step / questions.length) * 100;
 
   function startAssess() {
     setStep(0);
@@ -869,7 +940,7 @@ export default function TobinIndex() {
                 <h1 className="hero-headline fade-up-2">
                   Closing the gap between the <em>American Dream</em> and American Reality.
                 </h1>
-                <p className="hero-sub fade-up-3">
+        <p className="hero-sub fade-up-3">
                   An AI-powered framework that maps where you are, shows you what's available, and walks with you toward the life this country promised.
                 </p>
               </div>
@@ -922,7 +993,7 @@ export default function TobinIndex() {
               <h2>The first step is knowing where you stand.</h2>
               <p>Enter your zip code. Answer a few questions. In two minutes, you'll see your Tobin Index — and an AI guide will help you understand what it means and what you can do about it.</p>
               <div className="cta-steps">
-                {["Enter your zip code", "Answer 4 quick questions", "Receive your Index score", "Get an AI-guided action plan"].map((s, i) => (
+                {["Enter your zip code and age", "Answer 4 scored questions", "Receive your Index score", "Get an AI-guided action plan"].map((s, i) => (
                   <div className="cta-step" key={i}>
                     <span className="step-num">0{i + 1}</span>
                     <span className="step-text">{s}</span>
@@ -967,6 +1038,11 @@ export default function TobinIndex() {
             {!animating && (
               <>
                 <p className="assess-step-label fade-up">{q.label}</p>
+                {q.demographic && (
+                  <p style={{ display: "inline-block", marginBottom: "0.75rem", fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", letterSpacing: "0.15em", textTransform: "uppercase", background: "var(--cream)", border: "1px solid var(--rule)", padding: "0.3rem 0.7rem", color: "var(--muted)" }}>
+                    Demographic info only — not included in score
+                  </p>
+                )}
                 <h2 className="assess-question fade-up-2">{q.question}</h2>
                 {q.type === "text" ? (
                   <input
@@ -993,6 +1069,11 @@ export default function TobinIndex() {
                       </button>
                     ))}
                   </div>
+                )}
+                {q.note && (
+                  <p style={{ marginTop: "1.5rem", fontSize: "0.72rem", color: "var(--muted)", fontFamily: "'DM Mono', monospace", lineHeight: 1.6 }}>
+                    ↳ {q.note}
+                  </p>
                 )}
                 <div className="assess-nav">
                   <button className="assess-back" onClick={back}>← Back</button>
@@ -1045,14 +1126,15 @@ export default function TobinIndex() {
 
             <div className="pillar-scores fade-up-2">
               {[
-                { icon: "📊", title: "Economic", score: scores.economic },
-                { icon: "❤️", title: "Well-Being", score: scores.wellbeing },
-                { icon: "🏛️", title: "Social Trust", score: scores.social },
-                { icon: "🤝", title: "Community", score: scores.community },
+                { icon: "📊", title: "Economic", score: scores.economic, weight: "30%" },
+                { icon: "❤️", title: "Well-Being", score: scores.wellbeing, weight: "25%" },
+                { icon: "🤝", title: "Community", score: scores.community, weight: "25%" },
+                { icon: "🏛️", title: "Social Trust", score: scores.social, weight: "20%" },
               ].map((p) => (
                 <div className="pillar-score" key={p.title}>
                   <span className="ps-icon">{p.icon}</span>
                   <p className="ps-title">{p.title}</p>
+                  <p style={{ fontSize: "0.6rem", fontFamily: "'DM Mono', monospace", color: "var(--gold)", marginBottom: "0.4rem" }}>{p.weight} weight</p>
                   <p className="ps-score">{p.score}</p>
                   <div className="ps-bar-wrap">
                     <div className="ps-bar" style={{ width: `${p.score}%` }} />
@@ -1063,7 +1145,38 @@ export default function TobinIndex() {
 
             <div className="ai-insight fade-up-3">
               <p className="ai-label">✦ AI Guide Insight</p>
-              <p className="ai-text">{getAiInsight(scores, answers)}</p>
+              {getAiInsight(scores, answers).split('\n\n').map((para, i) => (
+                <p key={i} className="ai-text" style={{ marginBottom: i < 2 ? "1rem" : 0 }}>{para}</p>
+              ))}
+            </div>
+
+            {/* DATA ATTRIBUTION */}
+            <div style={{ marginTop: "2rem", padding: "1.5rem 2rem", border: "1px solid var(--rule)", background: "var(--cream)" }}>
+              <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "1rem" }}>
+                ✦ Data Sources &amp; Methodology
+              </p>
+              <p style={{ fontSize: "0.78rem", color: "var(--muted)", lineHeight: 1.7, fontWeight: 300, marginBottom: "0.75rem" }}>
+                Your Tobin Index score is calculated using a weighted composite of four pillars, each benchmarked against the most recent complete national data available from the U.S. Census Bureau and AmeriCorps.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                {[
+                  { pillar: "Economic Standing", weight: "30%", source: "U.S. Census Bureau — Current Population Survey Annual Social and Economic Supplement (CPS ASEC) 2024", benchmark: "National median household income: $83,730" },
+                  { pillar: "Well-Being", weight: "25%", source: "U.S. Census Bureau — CPS ASEC 2024", benchmark: "92% of Americans had health insurance coverage; 8% uninsured" },
+                  { pillar: "Community", weight: "25%", source: "AmeriCorps & U.S. Census Bureau — Civic Engagement and Volunteering Survey (CEV) 2023", benchmark: "28.3% of Americans formally volunteered through an organization" },
+                  { pillar: "Social Trust", weight: "20%", source: "U.S. Census Bureau — Current Population Survey Voting and Registration Supplement 2024", benchmark: "73.6% of citizen voting-age population was registered to vote" },
+                ].map((d) => (
+                  <div key={d.pillar} style={{ padding: "1rem", background: "var(--paper)", border: "1px solid var(--rule)" }}>
+                    <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--gold)", marginBottom: "0.3rem" }}>
+                      {d.pillar} · {d.weight} weight
+                    </p>
+                    <p style={{ fontSize: "0.78rem", color: "var(--ink)", fontWeight: 500, marginBottom: "0.3rem" }}>{d.benchmark}</p>
+                    <p style={{ fontSize: "0.72rem", color: "var(--muted)", lineHeight: 1.5 }}>{d.source}</p>
+                  </div>
+                ))}
+              </div>
+              <p style={{ marginTop: "1rem", fontSize: "0.7rem", color: "var(--muted)", fontFamily: "'DM Mono', monospace", lineHeight: 1.6 }}>
+                Zip code and age are collected for demographic context only and are not included in score calculations. Scores reflect your responses relative to national benchmarks — not a judgment of individual worth or effort.
+              </p>
             </div>
 
             <div style={{ marginTop: "2.5rem", display: "flex", gap: "1rem" }}>
