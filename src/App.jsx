@@ -1301,7 +1301,7 @@ export default function TobinIndex() {
               Your score is ready.
             </h2>
             <p className="email-gate-sub fade-up-3">
-              Enter your email to unlock your Tobin Index score and personalized AI insight. We'll never spam you or share your data.
+              Enter your email to unlock your Tobin Index score. We'll never spam you or share your data.
             </p>
 
             {/* Blurred score preview */}
