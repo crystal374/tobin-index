@@ -6,14 +6,16 @@ const style = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --ink: #0f0e0b;
-    --paper: #f5f0e8;
-    --cream: #ede8dc;
-    --gold: #c8922a;
+    --ink: #152b1e;
+    --paper: #f4f7f4;
+    --cream: #dde8dd;
+    --gold: #c8962a;
     --gold-light: #e8b84b;
-    --rust: #b84c2a;
-    --muted: #6b6456;
-    --rule: #c8bfad;
+    --rust: #2d6b40;
+    --muted: #4a6b4a;
+    --rule: #a8c4a8;
+    --forest: #1e3d2a;
+    --forest-dark: #152b1e;
   }
 
   html { scroll-behavior: smooth; }
@@ -31,10 +33,10 @@ const style = `
     justify-content: space-between;
     align-items: center;
     padding: 1.25rem 3rem;
-    border-bottom: 1px solid var(--rule);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     position: sticky;
     top: 0;
-    background: var(--paper);
+    background: var(--forest-dark);
     z-index: 100;
   }
   .header-logo {
@@ -42,33 +44,33 @@ const style = `
     font-size: 0.8rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255,255,255,0.6);
   }
-  .header-logo span { color: var(--ink); font-weight: 500; }
+  .header-logo span { color: #fff; font-weight: 500; }
   .header-nav { display: flex; gap: 2rem; align-items: center; }
   .nav-link {
     font-size: 0.82rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255,255,255,0.65);
     text-decoration: none;
     cursor: pointer;
     transition: color 0.2s;
   }
-  .nav-link:hover { color: var(--ink); }
+  .nav-link:hover { color: #fff; }
   .nav-cta {
     font-family: 'DM Mono', monospace;
     font-size: 0.75rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--gold);
+    color: #fff;
     border: none;
     padding: 0.55rem 1.2rem;
     cursor: pointer;
     transition: background 0.2s;
   }
-  .nav-cta:hover { background: var(--gold); }
+  .nav-cta:hover { background: var(--gold-light); }
 
   /* HERO */
   .hero {
@@ -123,14 +125,14 @@ const style = `
     font-size: 0.78rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--gold);
+    color: #fff;
     border: none;
     padding: 1rem 2rem;
     cursor: pointer;
     transition: background 0.2s, transform 0.15s;
   }
-  .btn-primary:hover { background: var(--gold); transform: translateY(-1px); }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
   .btn-secondary {
     font-size: 0.82rem;
     letter-spacing: 0.06em;
@@ -145,7 +147,7 @@ const style = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: var(--cream);
+    background: var(--forest-dark);
     position: relative;
     overflow: hidden;
   }
@@ -166,6 +168,7 @@ const style = `
     font-size: 1.45rem;
     line-height: 1.55;
     font-style: italic;
+    color: #fff;
     position: relative;
     z-index: 1;
   }
@@ -175,13 +178,13 @@ const style = `
     font-size: 0.7rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--gold-light);
   }
   .index-display {
     margin-top: 3rem;
     padding: 1.5rem;
-    border: 1px solid var(--rule);
-    background: var(--paper);
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.07);
     position: relative;
     z-index: 1;
   }
@@ -190,7 +193,7 @@ const style = `
     font-size: 0.65rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255,255,255,0.6);
     margin-bottom: 0.5rem;
   }
   .index-number {
@@ -202,7 +205,7 @@ const style = `
   }
   .index-caption {
     font-size: 0.82rem;
-    color: var(--muted);
+    color: rgba(255,255,255,0.6);
     margin-top: 0.4rem;
   }
 
@@ -294,7 +297,7 @@ const style = `
     border: 1px solid var(--rule);
     border-top: none;
     padding: 2.5rem;
-    background: var(--ink);
+    background: var(--forest-dark);
     color: var(--paper);
     text-align: center;
   }
@@ -394,10 +397,10 @@ const style = `
   }
   .maslow-tier:hover { opacity: 0.85; }
   .tier-5 { background: var(--gold); clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%); }
-  .tier-4 { background: #c47d2c; clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%); }
-  .tier-3 { background: #a06030; clip-path: polygon(12% 0%, 88% 0%, 100% 100%, 0% 100%); }
-  .tier-2 { background: #6b3d20; clip-path: polygon(6% 0%, 94% 0%, 100% 100%, 0% 100%); }
-  .tier-1 { background: var(--ink); clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
+  .tier-4 { background: #2d6b40; clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%); }
+  .tier-3 { background: #235233; clip-path: polygon(12% 0%, 88% 0%, 100% 100%, 0% 100%); }
+  .tier-2 { background: #1a3d26; clip-path: polygon(6% 0%, 94% 0%, 100% 100%, 0% 100%); }
+  .tier-1 { background: #0e2018; clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }
 
   /* ASSESSMENT */
   .assess-overlay {
@@ -412,10 +415,10 @@ const style = `
     justify-content: space-between;
     align-items: center;
     padding: 1.25rem 3rem;
-    border-bottom: 1px solid var(--rule);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     position: sticky;
     top: 0;
-    background: var(--paper);
+    background: var(--forest-dark);
     z-index: 10;
   }
   .assess-logo {
@@ -423,17 +426,17 @@ const style = `
     font-size: 0.8rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255,255,255,0.7);
   }
   .assess-close {
     background: none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: var(--muted);
+    color: rgba(255,255,255,0.7);
     transition: color 0.2s;
   }
-  .assess-close:hover { color: var(--ink); }
+  .assess-close:hover { color: #fff; }
   .assess-progress {
     height: 3px;
     background: var(--rule);
@@ -622,7 +625,7 @@ const style = `
   .ps-bar { height: 100%; background: var(--gold); }
   .ai-insight {
     padding: 2.5rem 3rem;
-    background: var(--ink);
+    background: var(--forest-dark);
     color: var(--paper);
     position: relative;
     overflow: hidden;
@@ -708,28 +711,28 @@ const pillars = [
     title: "Economic Standing",
     maps: "Maps to: LIFE",
     needs: "Physiological & Safety",
-    desc: "Income, housing, employment, education, cost of living, and business ownership. Can you survive and build stability?",
+    desc: "Income, housing, employment, education, and entrepreneurship. Your financial foundation and upward mobility. Does your income allow you to save? Are you surviving or thriving?",
   },
   {
     icon: "❤️",
     title: "Well-Being",
     maps: "Maps to: LIFE",
     needs: "Physiological & Safety",
-    desc: "Healthcare access, life expectancy, mortality rates, and food security. Are you healthy enough to dream?",
+    desc: "Healthcare access, quality of life, and access to clean water and fresh food. Your capacity to live fully. Can you access physical and mental healthcare? Does your health support your way of life?",
   },
   {
     icon: "🏛️",
     title: "Social Trust",
     maps: "Maps to: LIBERTY",
     needs: "Belonging & Esteem",
-    desc: "Voter registration, turnout, polling access. Do you believe the system hears you? Can you even reach it?",
+    desc: "Voter registration, election turnout, and access to polling. Your voice in the system that shapes your life. Do you believe the system is listening to you? Does your voice make a difference?",
   },
   {
     icon: "🤝",
     title: "Community",
     maps: "Maps to: LIBERTY",
     needs: "Belonging & Esteem",
-    desc: "Crime rates, volunteerism, charitable giving. Do your neighbors know your name? Would they help if you needed it?",
+    desc: "Crime rates, volunteerism, and capacity for charitable giving. The strength of your local bonds. Do you know your neighbors? Could you ask your support system for help?",
   },
 ];
 
@@ -1068,7 +1071,7 @@ export default function TobinIndex() {
 
       {/* SAVING OVERLAY */}
       {saving && (
-        <div style={{ position: "fixed", inset: 0, background: "var(--paper)", zIndex: 300, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
+        <div style={{ position: "fixed", inset: 0, background: "var(--forest-dark)", zIndex: 300, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
           <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.7rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--gold)" }}>✦ Saving your response…</p>
           <p style={{ fontSize: "0.85rem", color: "var(--muted)", fontWeight: 300 }}>Just a moment while we record your results.</p>
         </div>
