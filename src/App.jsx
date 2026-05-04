@@ -877,12 +877,51 @@ function getAiInsight(scores, answers) {
   return `Your Tobin Index of ${scores.total} ${age} reflects a profile we'd describe as "${label}" — a composite reading of your economic position, health access, civic participation, and community engagement relative to the promises embedded in the Declaration of Independence. Zip code ${zip} provides important geographic context, as local infrastructure, employment density, and public services significantly shape what's achievable.\n\nYour strongest pillar is ${highestPillar[0]} (${highestPillar[1].score}/100). Your lowest pillar is ${lowestPillar[0]} (${lowestPillar[1].score}/100). ${lowestPillar[1].context} Focusing here first — whether through local resource programs, community organizations, or civic participation — is likely to yield the most meaningful gains in your overall index.\n\nThe gap between your current score and 100 is not a measure of failure. It is a measure of what the system still owes you.`;
 }
 
+// ─── SUPABASE CONFIG ───────────────────────────────────────────────────────
+const SUPABASE_URL = "https://byzafxumlampwbwcivqt.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5emFmeHVtbGFtcHdid2NpdnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MDUwMzQsImV4cCI6MjA5MjQ4MTAzNH0.C5JzxL9Kepv0qnN2i2IxrgDuV96lVvTqemvBgrf63DA";
+
+async function saveResponse(answers, scores) {
+  try {
+    const payload = {
+      zip:              answers.zip || null,
+      age:              answers.age || null,
+      income:           answers.income || null,
+      healthcare:       answers.healthcare || null,
+      volunteer:        answers.volunteer || null,
+      voting:           answers.voting || null,
+      score_economic:   scores.economic,
+      score_wellbeing:  scores.wellbeing,
+      score_social:     scores.social,
+      score_community:  scores.community,
+      score_total:      scores.total,
+      created_at:       new Date().toISOString(),
+    };
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/responses`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Prefer": "return=minimal",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      console.error("Supabase save failed:", res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("Supabase error:", err);
+  }
+}
+
 export default function TobinIndex() {
   const [page, setPage] = useState("home"); // home | assess | results
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [scores, setScores] = useState(null);
   const [animating, setAnimating] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const progress = (step / questions.length) * 100;
 
@@ -896,7 +935,7 @@ export default function TobinIndex() {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   }
 
-  function next() {
+  async function next() {
     const q = questions[step];
     if (q.type === "text" && !answers[q.id]) return;
     if (step < questions.length - 1) {
@@ -905,6 +944,9 @@ export default function TobinIndex() {
     } else {
       const s = computeScore(answers);
       setScores(s);
+      setSaving(true);
+      await saveResponse(answers, s);
+      setSaving(false);
       setPage("results");
     }
   }
@@ -1021,6 +1063,14 @@ export default function TobinIndex() {
             <div className="footer-logo">Tobin Index</div>
             <p className="footer-copy">An AI-powered civic framework for American opportunity.</p>
           </footer>
+        </div>
+      )}
+
+      {/* SAVING OVERLAY */}
+      {saving && (
+        <div style={{ position: "fixed", inset: 0, background: "var(--paper)", zIndex: 300, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
+          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.7rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--gold)" }}>✦ Saving your response…</p>
+          <p style={{ fontSize: "0.85rem", color: "var(--muted)", fontWeight: 300 }}>Just a moment while we record your results.</p>
         </div>
       )}
 
