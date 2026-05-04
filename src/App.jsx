@@ -325,12 +325,13 @@ const style = `
   /* CTA SECTION */
   .cta-section {
     border-top: 1px solid var(--rule);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
   }
   .cta-left {
     padding: 5rem 3rem;
-    border-right: 1px solid var(--rule);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .cta-left h2 {
     font-family: 'Playfair Display', serif;
@@ -811,7 +812,6 @@ const style = `
     .pillars-grid { grid-template-columns: 1fr 1fr; }
     .pillar { border-bottom: 1px solid var(--rule); }
     .cta-section { grid-template-columns: 1fr; }
-    .cta-right { border-top: 1px solid var(--rule); }
     .score-display { grid-template-columns: 1fr; gap: 2rem; }
     .pillar-scores { grid-template-columns: 1fr 1fr; }
     .assess-options { grid-template-columns: 1fr; }
@@ -1104,8 +1104,6 @@ export default function TobinIndex() {
           <header className="header">
             <div className="header-logo"><span>Tobin</span> Index</div>
             <nav className="header-nav">
-              <span className="nav-link">About</span>
-              <span className="nav-link">Methodology</span>
               <button className="nav-cta" onClick={startAssess}>Find Your Score</button>
             </nav>
           </header>
@@ -1145,7 +1143,7 @@ export default function TobinIndex() {
             </div>
             <div className="pillars-intro">
               <h2>Four Pillars. Three Promises. One Index.</h2>
-              <p>The Tobin Index maps Maslow's hierarchy of needs to the Declaration of Independence's foundational promises — then measures where the system is keeping that promise, and where it isn't.</p>
+              <p>The Tobin Index maps Maslow's Hierarchy of Needs to the promise of The American Dream as described in the Declaration of Independence — life, liberty and the pursuit of happiness.</p>
             </div>
             <div className="pillars-grid">
               {pillars.map((p, i) => (
@@ -1159,126 +1157,34 @@ export default function TobinIndex() {
               ))}
             </div>
             <div className="pillars-summit">
-              <p className="summit-label">When all four pillars rise together</p>
-              <h3 className="summit-title">The Pursuit of Happiness</h3>
-              <p className="summit-desc">Self-Actualization — the full promise of the Declaration, fulfilled.</p>
+              <p className="summit-label">When all four pillars rise together:</p>
+              <h3 className="summit-title">Life, Liberty, and the Pursuit of Happiness</h3>
             </div>
           </section>
 
           <section className="cta-section">
-            <div className="cta-left">
+            <div className="cta-left" style={{ textAlign: "center", alignItems: "center", display: "flex", flexDirection: "column" }}>
               <h2>The first step is knowing where you stand.</h2>
               <p>Enter your zip code. Answer a few questions. In two minutes, you'll see your Tobin Index — and an AI guide will help you understand what it means and what you can do about it.</p>
-              <div className="cta-steps">
-                {["Enter your zip code and age", "Answer 4 scored questions", "Receive your Index score", "Get an AI-guided action plan"].map((s, i) => (
+              <div className="cta-steps" style={{ alignItems: "center" }}>
+                {[
+                  "Enter your zip code and age",
+                  "Answer 4 scored questions",
+                  "Receive your Index score",
+                ].map((s, i) => (
                   <div className="cta-step" key={i}>
                     <span className="step-num">0{i + 1}</span>
                     <span className="step-text">{s}</span>
                   </div>
                 ))}
+                <div className="cta-step">
+                  <span className="step-num">04</span>
+                  <span className="step-text">Get an AI-guided action plan <strong style={{ fontWeight: 900 }}>(coming soon!)</strong></span>
+                </div>
               </div>
               <button className="btn-primary" onClick={startAssess}>Start Your Assessment</button>
             </div>
-            <div className="cta-right" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#eaf2ea", padding: "1rem" }}>
-              <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", maxWidth: 700 }}>
-                <defs>
-                  <filter id="ds">
-                    <feDropShadow dx="1" dy="2" stdDeviation="2" floodOpacity="0.18"/>
-                  </filter>
-                </defs>
 
-                {/* Background */}
-                <rect width="700" height="320" fill="#eaf2ea"/>
-
-                {/* Grass strip */}
-                <rect x="0" y="130" width="700" height="60" fill="#c8dfc8" opacity="0.6" rx="4"/>
-
-                {/* ── HORIZONTAL WINDING ROAD ── */}
-                {/* Shadow */}
-                <path d="M 30,180 C 80,180 100,155 150,155 C 200,155 220,180 270,180 C 320,180 340,155 390,155 C 440,155 460,180 510,180 C 560,180 580,155 640,155 C 660,155 675,158 690,162"
-                  stroke="#1a1a1a" strokeWidth="42" fill="none" strokeLinecap="round" opacity="0.15"/>
-                {/* Road body */}
-                <path d="M 30,180 C 80,180 100,155 150,155 C 200,155 220,180 270,180 C 320,180 340,155 390,155 C 440,155 460,180 510,180 C 560,180 580,155 640,155 C 660,155 675,158 690,162"
-                  stroke="#333" strokeWidth="38" fill="none" strokeLinecap="round"/>
-                {/* Road highlight */}
-                <path d="M 30,180 C 80,180 100,155 150,155 C 200,155 220,180 270,180 C 320,180 340,155 390,155 C 440,155 460,180 510,180 C 560,180 580,155 640,155 C 660,155 675,158 690,162"
-                  stroke="#fff" strokeWidth="39" fill="none" strokeLinecap="round" opacity="0.05"/>
-                {/* Center dashes */}
-                <path d="M 30,180 C 80,180 100,155 150,155 C 200,155 220,180 270,180 C 320,180 340,155 390,155 C 440,155 460,180 510,180 C 560,180 580,155 640,155 C 660,155 675,158 690,162"
-                  stroke="#f0f0e0" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="12,14" opacity="0.55"/>
-
-                {/* ── MILESTONE 1: ECONOMIC STANDING — x=150, on road y=155 ── */}
-                {/* Dome base */}
-                <ellipse cx="150" cy="157" rx="11" ry="4" fill="#d0ddd0"/>
-                <ellipse cx="150" cy="155" rx="9" ry="3.5" fill="#fff"/>
-                {/* Pole going UP */}
-                <line x1="150" y1="153" x2="150" y2="108" stroke="#444" strokeWidth="2"/>
-                {/* Flag pointing right */}
-                <path d="M 150,108 L 150,132 L 198,120 Z" fill="#c8962a" filter="url(#ds)"/>
-                <text x="154" y="121" fontFamily="sans-serif" fontSize="7" fontWeight="bold" fill="#fff">ECONOMIC</text>
-                <text x="154" y="130" fontFamily="sans-serif" fontSize="6" fill="#fff">STANDING</text>
-                {/* Label ABOVE flag */}
-                <text x="150" y="98" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fontWeight="bold" fill="#152b1e">Economic</text>
-                <text x="150" y="110" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">Income, housing &amp;</text>
-                <text x="150" y="120" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">entrepreneurship.</text>
-
-                {/* ── MILESTONE 2: WELL-BEING — x=270, on road y=180 ── */}
-                <ellipse cx="270" cy="182" rx="11" ry="4" fill="#d0ddd0"/>
-                <ellipse cx="270" cy="180" rx="9" ry="3.5" fill="#fff"/>
-                {/* Pole going DOWN */}
-                <line x1="270" y1="184" x2="270" y2="228" stroke="#444" strokeWidth="2"/>
-                {/* Flag pointing right */}
-                <path d="M 270,204 L 270,228 L 318,216 Z" fill="#2d7a4a" filter="url(#ds)"/>
-                <text x="274" y="218" fontFamily="sans-serif" fontSize="7" fontWeight="bold" fill="#fff">WELL-BEING</text>
-                {/* Label BELOW flag */}
-                <text x="270" y="242" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fontWeight="bold" fill="#152b1e">Well-Being</text>
-                <text x="270" y="254" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">Healthcare, clean water</text>
-                <text x="270" y="264" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">&amp; quality of life.</text>
-
-                {/* ── MILESTONE 3: COMMUNITY — x=390, on road y=155 ── */}
-                <ellipse cx="390" cy="157" rx="11" ry="4" fill="#d0ddd0"/>
-                <ellipse cx="390" cy="155" rx="9" ry="3.5" fill="#fff"/>
-                {/* Pole going UP */}
-                <line x1="390" y1="153" x2="390" y2="108" stroke="#444" strokeWidth="2"/>
-                {/* Flag pointing right */}
-                <path d="M 390,108 L 390,132 L 438,120 Z" fill="#1e5c38" filter="url(#ds)"/>
-                <text x="394" y="121" fontFamily="sans-serif" fontSize="7" fontWeight="bold" fill="#fff">COMMUNITY</text>
-                {/* Label ABOVE */}
-                <text x="390" y="98" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fontWeight="bold" fill="#152b1e">Community</text>
-                <text x="390" y="110" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">Volunteerism &amp; local</text>
-                <text x="390" y="120" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">civic bonds.</text>
-
-                {/* ── MILESTONE 4: SOCIAL TRUST — x=510, on road y=180 ── */}
-                <ellipse cx="510" cy="182" rx="11" ry="4" fill="#d0ddd0"/>
-                <ellipse cx="510" cy="180" rx="9" ry="3.5" fill="#fff"/>
-                {/* Pole going DOWN */}
-                <line x1="510" y1="184" x2="510" y2="228" stroke="#444" strokeWidth="2"/>
-                {/* Flag pointing right */}
-                <path d="M 510,204 L 510,228 L 558,216 Z" fill="#152b1e" filter="url(#ds)"/>
-                <text x="514" y="218" fontFamily="sans-serif" fontSize="7" fontWeight="bold" fill="#e8b84b">SOCIAL TRUST</text>
-                {/* Label BELOW */}
-                <text x="510" y="242" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fontWeight="bold" fill="#152b1e">Social Trust</text>
-                <text x="510" y="254" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">Voter registration &amp;</text>
-                <text x="510" y="264" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">civic participation.</text>
-
-                {/* ── DESTINATION: AMERICAN DREAM — far right ── */}
-                {/* Glow */}
-                <circle cx="660" cy="160" r="36" fill="#e8b84b" opacity="0.15"/>
-                <circle cx="660" cy="160" r="24" fill="#c8962a" opacity="0.9"/>
-                <circle cx="660" cy="160" r="18" fill="#e8b84b"/>
-                {/* Star */}
-                <polygon points="660,149 663,157 672,157 665,162 668,171 660,166 652,171 655,162 648,157 657,157" fill="#152b1e"/>
-                {/* Label above */}
-                <text x="660" y="124" textAnchor="middle" fontFamily="Georgia,serif" fontSize="9" fontWeight="bold" fill="#c8962a">AMERICAN</text>
-                <text x="660" y="136" textAnchor="middle" fontFamily="Georgia,serif" fontSize="9" fontWeight="bold" fill="#c8962a">DREAM</text>
-                <text x="660" y="148" textAnchor="middle" fontFamily="Georgia,serif" fontSize="7" fontStyle="italic" fill="#4a6b4a">The destination</text>
-
-                {/* START label far left */}
-                <text x="22" y="200" fontFamily="Georgia,serif" fontSize="8" fontStyle="italic" fill="#4a6b4a">Start</text>
-                <polygon points="28,175 22,180 28,185" fill="#c8962a"/>
-
-              </svg>
-            </div>
           </section>
 
           <footer className="footer">
