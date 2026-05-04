@@ -879,7 +879,7 @@ const questions = [
     label: "Step 3 of 6",
     question: "Which best describes your household income?",
     options: ["Under $35,000", "$35,000–$74,999", "$75,000–$124,999", "$125,000 or more"],
-    note: "30% weight · Economic Standing pillar. U.S. median household income: $83,730 (Census Bureau CPS ASEC 2024).",
+    note: "Economic Standing pillar. U.S. median household income: $83,730 (Census Bureau CPS ASEC 2024).",
   },
   {
     id: "healthcare",
@@ -887,7 +887,7 @@ const questions = [
     label: "Step 4 of 6",
     question: "Do you currently have health insurance?",
     options: ["Yes, employer-provided", "Yes, government program (Medicaid/Medicare)", "Yes, self-purchased", "No, I am uninsured"],
-    note: "25% weight · Well-Being pillar. 92% of Americans had coverage in 2024 (Census Bureau CPS ASEC 2024).",
+    note: "Well-Being pillar. 92% of Americans had coverage in 2024 (Census Bureau CPS ASEC 2024).",
   },
   {
     id: "volunteer",
@@ -895,7 +895,7 @@ const questions = [
     label: "Step 5 of 6",
     question: "Do you currently volunteer with any organizations?",
     options: ["Yes, regularly (monthly or more)", "Yes, occasionally (a few times a year)", "Not currently, but I have in the past", "No, I have never volunteered"],
-    note: "25% weight · Community pillar. 28.3% of Americans formally volunteered in 2023 (AmeriCorps/Census Bureau Civic Life Survey 2023).",
+    note: "Community pillar. 28.3% of Americans formally volunteered in 2023 (AmeriCorps/Census Bureau Civic Life Survey 2023).",
   },
   {
     id: "voting",
@@ -903,7 +903,7 @@ const questions = [
     label: "Step 6 of 6",
     question: "Are you registered to vote?",
     options: ["Yes, and I vote in most elections", "Yes, but I rarely vote", "No, but I plan to register", "No, and I don't plan to register"],
-    note: "20% weight · Social Trust pillar. 73.6% of citizen voting-age Americans were registered in 2024 (Census Bureau CPS Voting Supplement 2024).",
+    note: "Social Trust pillar. 73.6% of citizen voting-age Americans were registered in 2024 (Census Bureau CPS Voting Supplement 2024).",
   },
 ];
 
