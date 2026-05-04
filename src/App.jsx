@@ -520,6 +520,124 @@ const style = `
   }
   .assess-back:hover { color: var(--ink); }
 
+  /* EMAIL GATE */
+  .email-gate {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 200;
+    overflow-y: auto;
+  }
+  .email-gate-body {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+  }
+  .email-gate-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.25rem;
+  }
+  .email-gate-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+  .email-gate-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 2.5rem;
+    max-width: 42ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .email-gate-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  .email-gate-input {
+    width: 100%;
+    max-width: 380px;
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    border: none;
+    border-bottom: 2px solid var(--rule);
+    background: transparent;
+    padding: 0.75rem 0;
+    color: var(--ink);
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .email-gate-input:focus { border-color: var(--gold); }
+  .email-gate-privacy {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 0.5rem;
+  }
+  .email-preview {
+    margin-top: 3rem;
+    padding: 2rem;
+    border: 1px solid var(--rule);
+    background: var(--cream);
+    position: relative;
+    overflow: hidden;
+  }
+  .email-preview::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(6px);
+    background: rgba(244,247,244,0.55);
+  }
+  .email-preview-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+  .email-preview-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .email-preview-lock {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .lock-icon {
+    font-size: 2rem;
+  }
+  .lock-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
   /* RESULTS */
   .results-body {
     max-width: 900px;
@@ -887,6 +1005,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 async function saveResponse(answers, scores) {
   try {
     const payload = {
+      email:            answers.email || null,
       zip:              answers.zip || null,
       age:              answers.age || null,
       income:           answers.income || null,
@@ -919,12 +1038,14 @@ async function saveResponse(answers, scores) {
 }
 
 export default function TobinIndex() {
-  const [page, setPage] = useState("home"); // home | assess | results
+  const [page, setPage] = useState("home"); // home | assess | email | results
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [scores, setScores] = useState(null);
   const [animating, setAnimating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const progress = (step / questions.length) * 100;
 
@@ -947,11 +1068,22 @@ export default function TobinIndex() {
     } else {
       const s = computeScore(answers);
       setScores(s);
-      setSaving(true);
-      await saveResponse(answers, s);
-      setSaving(false);
-      setPage("results");
+      setPage("email");
     }
+  }
+
+  async function submitEmail() {
+    const trimmed = email.trim();
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    if (!valid) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    setEmailError("");
+    setSaving(true);
+    await saveResponse({ ...answers, email: trimmed }, scores);
+    setSaving(false);
+    setPage("results");
   }
 
   function back() {
@@ -1047,18 +1179,105 @@ export default function TobinIndex() {
               </div>
               <button className="btn-primary" onClick={startAssess}>Start Your Assessment</button>
             </div>
-            <div className="cta-right">
-              <div className="maslow-diagram">
-                {[
-                  { cls: "tier-5", label: "Self-Actualization" },
-                  { cls: "tier-4", label: "Esteem" },
-                  { cls: "tier-3", label: "Belonging" },
-                  { cls: "tier-2", label: "Safety" },
-                  { cls: "tier-1", label: "Physiological" },
-                ].map((t) => (
-                  <div key={t.cls} className={`maslow-tier ${t.cls}`}>{t.label}</div>
-                ))}
-              </div>
+            <div className="cta-right" style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#eaf2ea", padding: "1rem" }}>
+              <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", maxWidth: 700 }}>
+                <defs>
+                  <filter id="ds">
+                    <feDropShadow dx="1" dy="2" stdDeviation="2" floodOpacity="0.18"/>
+                  </filter>
+                </defs>
+
+                {/* Background */}
+                <rect width="700" height="320" fill="#eaf2ea"/>
+
+                {/* Grass strip */}
+                <rect x="0" y="130" width="700" height="60" fill="#c8dfc8" opacity="0.6" rx="4"/>
+
+                {/* ── HORIZONTAL WINDING ROAD ── */}
+                {/* Shadow */}
+                <path d="M 30,180 C 80,180 100,155 150,155 C 200,155 220,180 270,180 C 320,180 340,155 390,155 C 440,155 460,180 510,180 C 560,180 580,155 640,155 C 660,155 675,158 690,162"
+                  stroke="#1a1a1a" strokeWidth="42" fill="none" strokeLinecap="round" opacity="0.15"/>
+                {/* Road body */}
+                <path d="M 30,180 C 80,180 100,155 150,155 C 200,155 220,180 270,180 C 320,180 340,155 390,155 C 440,155 460,180 510,180 C 560,180 580,155 640,155 C 660,155 675,158 690,162"
+                  stroke="#333" strokeWidth="38" fill="none" strokeLinecap="round"/>
+                {/* Road highlight */}
+                <path d="M 30,180 C 80,180 100,155 150,155 C 200,155 220,180 270,180 C 320,180 340,155 390,155 C 440,155 460,180 510,180 C 560,180 580,155 640,155 C 660,155 675,158 690,162"
+                  stroke="#fff" strokeWidth="39" fill="none" strokeLinecap="round" opacity="0.05"/>
+                {/* Center dashes */}
+                <path d="M 30,180 C 80,180 100,155 150,155 C 200,155 220,180 270,180 C 320,180 340,155 390,155 C 440,155 460,180 510,180 C 560,180 580,155 640,155 C 660,155 675,158 690,162"
+                  stroke="#f0f0e0" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeDasharray="12,14" opacity="0.55"/>
+
+                {/* ── MILESTONE 1: ECONOMIC STANDING — x=150, on road y=155 ── */}
+                {/* Dome base */}
+                <ellipse cx="150" cy="157" rx="11" ry="4" fill="#d0ddd0"/>
+                <ellipse cx="150" cy="155" rx="9" ry="3.5" fill="#fff"/>
+                {/* Pole going UP */}
+                <line x1="150" y1="153" x2="150" y2="108" stroke="#444" strokeWidth="2"/>
+                {/* Flag pointing right */}
+                <path d="M 150,108 L 150,132 L 198,120 Z" fill="#c8962a" filter="url(#ds)"/>
+                <text x="154" y="121" fontFamily="sans-serif" fontSize="7" fontWeight="bold" fill="#fff">ECONOMIC</text>
+                <text x="154" y="130" fontFamily="sans-serif" fontSize="6" fill="#fff">STANDING</text>
+                {/* Label ABOVE flag */}
+                <text x="150" y="98" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fontWeight="bold" fill="#152b1e">Economic</text>
+                <text x="150" y="110" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">Income, housing &amp;</text>
+                <text x="150" y="120" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">entrepreneurship.</text>
+
+                {/* ── MILESTONE 2: WELL-BEING — x=270, on road y=180 ── */}
+                <ellipse cx="270" cy="182" rx="11" ry="4" fill="#d0ddd0"/>
+                <ellipse cx="270" cy="180" rx="9" ry="3.5" fill="#fff"/>
+                {/* Pole going DOWN */}
+                <line x1="270" y1="184" x2="270" y2="228" stroke="#444" strokeWidth="2"/>
+                {/* Flag pointing right */}
+                <path d="M 270,204 L 270,228 L 318,216 Z" fill="#2d7a4a" filter="url(#ds)"/>
+                <text x="274" y="218" fontFamily="sans-serif" fontSize="7" fontWeight="bold" fill="#fff">WELL-BEING</text>
+                {/* Label BELOW flag */}
+                <text x="270" y="242" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fontWeight="bold" fill="#152b1e">Well-Being</text>
+                <text x="270" y="254" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">Healthcare, clean water</text>
+                <text x="270" y="264" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">&amp; quality of life.</text>
+
+                {/* ── MILESTONE 3: COMMUNITY — x=390, on road y=155 ── */}
+                <ellipse cx="390" cy="157" rx="11" ry="4" fill="#d0ddd0"/>
+                <ellipse cx="390" cy="155" rx="9" ry="3.5" fill="#fff"/>
+                {/* Pole going UP */}
+                <line x1="390" y1="153" x2="390" y2="108" stroke="#444" strokeWidth="2"/>
+                {/* Flag pointing right */}
+                <path d="M 390,108 L 390,132 L 438,120 Z" fill="#1e5c38" filter="url(#ds)"/>
+                <text x="394" y="121" fontFamily="sans-serif" fontSize="7" fontWeight="bold" fill="#fff">COMMUNITY</text>
+                {/* Label ABOVE */}
+                <text x="390" y="98" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fontWeight="bold" fill="#152b1e">Community</text>
+                <text x="390" y="110" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">Volunteerism &amp; local</text>
+                <text x="390" y="120" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">civic bonds.</text>
+
+                {/* ── MILESTONE 4: SOCIAL TRUST — x=510, on road y=180 ── */}
+                <ellipse cx="510" cy="182" rx="11" ry="4" fill="#d0ddd0"/>
+                <ellipse cx="510" cy="180" rx="9" ry="3.5" fill="#fff"/>
+                {/* Pole going DOWN */}
+                <line x1="510" y1="184" x2="510" y2="228" stroke="#444" strokeWidth="2"/>
+                {/* Flag pointing right */}
+                <path d="M 510,204 L 510,228 L 558,216 Z" fill="#152b1e" filter="url(#ds)"/>
+                <text x="514" y="218" fontFamily="sans-serif" fontSize="7" fontWeight="bold" fill="#e8b84b">SOCIAL TRUST</text>
+                {/* Label BELOW */}
+                <text x="510" y="242" textAnchor="middle" fontFamily="sans-serif" fontSize="9" fontWeight="bold" fill="#152b1e">Social Trust</text>
+                <text x="510" y="254" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">Voter registration &amp;</text>
+                <text x="510" y="264" textAnchor="middle" fontFamily="sans-serif" fontSize="6.5" fill="#4a6b4a">civic participation.</text>
+
+                {/* ── DESTINATION: AMERICAN DREAM — far right ── */}
+                {/* Glow */}
+                <circle cx="660" cy="160" r="36" fill="#e8b84b" opacity="0.15"/>
+                <circle cx="660" cy="160" r="24" fill="#c8962a" opacity="0.9"/>
+                <circle cx="660" cy="160" r="18" fill="#e8b84b"/>
+                {/* Star */}
+                <polygon points="660,149 663,157 672,157 665,162 668,171 660,166 652,171 655,162 648,157 657,157" fill="#152b1e"/>
+                {/* Label above */}
+                <text x="660" y="124" textAnchor="middle" fontFamily="Georgia,serif" fontSize="9" fontWeight="bold" fill="#c8962a">AMERICAN</text>
+                <text x="660" y="136" textAnchor="middle" fontFamily="Georgia,serif" fontSize="9" fontWeight="bold" fill="#c8962a">DREAM</text>
+                <text x="660" y="148" textAnchor="middle" fontFamily="Georgia,serif" fontSize="7" fontStyle="italic" fill="#4a6b4a">The destination</text>
+
+                {/* START label far left */}
+                <text x="22" y="200" fontFamily="Georgia,serif" fontSize="8" fontStyle="italic" fill="#4a6b4a">Start</text>
+                <polygon points="28,175 22,180 28,185" fill="#c8962a"/>
+
+              </svg>
             </div>
           </section>
 
@@ -1066,6 +1285,55 @@ export default function TobinIndex() {
             <div className="footer-logo">Tobin Index</div>
             <p className="footer-copy">An AI-powered civic framework for American opportunity.</p>
           </footer>
+        </div>
+      )}
+
+      {/* EMAIL GATE */}
+      {page === "email" && scores && (
+        <div className="email-gate">
+          <div className="assess-header">
+            <div className="assess-logo">Tobin Index — Almost There</div>
+            <button className="assess-close" onClick={() => setPage("home")}>×</button>
+          </div>
+          <div className="email-gate-body">
+            <p className="email-gate-eyebrow fade-up">✦ One Last Step</p>
+            <h2 className="email-gate-headline fade-up-2">
+              Your score is ready.
+            </h2>
+            <p className="email-gate-sub fade-up-3">
+              Enter your email to unlock your Tobin Index score and personalized AI insight. We'll never spam you or share your data.
+            </p>
+
+            {/* Blurred score preview */}
+            <div className="email-preview fade-up">
+              <p className="email-preview-label">Your Tobin Index Score</p>
+              <div className="email-preview-score">{scores.total}</div>
+              <div className="email-preview-lock">
+                <span className="lock-icon">🔒</span>
+                <span className="lock-text">Enter your email to unlock</span>
+              </div>
+            </div>
+
+            {/* Email form */}
+            <div className="email-gate-form fade-up-2" style={{ marginTop: "2rem" }}>
+              <input
+                className="email-gate-input"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setEmailError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && submitEmail()}
+                autoFocus
+              />
+              {emailError && (
+                <p style={{ color: "var(--rust)", fontSize: "0.8rem", fontFamily: "'DM Mono', monospace" }}>{emailError}</p>
+              )}
+              <button className="btn-primary" onClick={submitEmail} style={{ marginTop: "0.5rem", width: "100%", maxWidth: 380 }}>
+                Unlock My Score →
+              </button>
+              <p className="email-gate-privacy">🔒 Your data is private and never sold.</p>
+            </div>
+          </div>
         </div>
       )}
 
